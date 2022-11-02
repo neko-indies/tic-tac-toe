@@ -1,7 +1,7 @@
 const CellState = {
   X: "x",
   O: "o",
-  Blank: "",
+  Empty: "",
 }
 
 const AlertKind = {
@@ -39,13 +39,19 @@ const WinPatterns = [
   [2, 5, 8],
 ]
 
+const Config = {
+  thinkingTimeMin: 500,
+  thinkingTimeMax: 1300,
+  roundBreakTime: 3000,
+}
+
 let originalContainerHtml
 let alertTimeout
 
 const defaultCellMap = [
-  [CellState.Blank, CellState.Blank, CellState.Blank],
-  [CellState.Blank, CellState.Blank, CellState.Blank],
-  [CellState.Blank, CellState.Blank, CellState.Blank],
+  [CellState.Empty, CellState.Empty, CellState.Empty],
+  [CellState.Empty, CellState.Empty, CellState.Empty],
+  [CellState.Empty, CellState.Empty, CellState.Empty],
 ]
 
 const computerTaunts = [
@@ -118,13 +124,13 @@ function updateScore(score) {
 function endRound(winnerPattern, gameState) {
   logEvent("round ended")
 
-  // NOTE: Do not mutate arguments. Bad practice.
+  // NOTE: Do not mutate arguments: Bad practice.
   let score = [...gameState.score]
 
   // Tie.
   if (winnerPattern === null) {
     score[2]++
-    playSound(Sound.Tie)
+    tryPlaySound(Sound.Tie)
     displayAlert("🪢 It's a tie.", AlertKind.Info)
   }
   // Otherwise, the player either won or lost.
@@ -134,7 +140,7 @@ function endRound(winnerPattern, gameState) {
 
     winnerPattern.forEach((cellNumber) => highlightCell(cellNumber, false))
     score[didPlayerWin ? 0 : 1]++
-    playSound(didPlayerWin ? Sound.Win : Sound.Lose)
+    tryPlaySound(didPlayerWin ? Sound.Win : Sound.Lose)
 
     displayAlert(
       didPlayerWin
@@ -151,11 +157,11 @@ function endRound(winnerPattern, gameState) {
     $(".container").html(originalContainerHtml)
 
     setupEvents({
-      ...getInitialState(),
+      ...makeInitialState(),
       isComputerSmart: gameState.isComputerSmart,
       score: score,
     })
-  }, 5000)
+  }, Config.roundBreakTime)
 }
 
 /**
@@ -164,6 +170,7 @@ function endRound(winnerPattern, gameState) {
 function checkForGameEnd(gameState) {
   const winnerPatternOrNull = checkForWinner(gameState.cellMap)
 
+  // REVISE: Re-write.
   if (winnerPatternOrNull !== null) {
     endRound(winnerPatternOrNull, gameState)
 
@@ -181,6 +188,7 @@ function setActiveStatus(isPlayer) {
   let $statusPlayer = $("#status-player")
   let $statusComputer = $("#status-computer");
 
+  // REVISE: Re-write.
   (!isPlayer ? $statusPlayer : $statusComputer).addClass("active");
   (isPlayer ? $statusPlayer : $statusComputer).removeClass("active")
 }
@@ -202,44 +210,45 @@ function processPick(gameState, pickedCellNumberOrNull) {
   setTimeout(() => {
     processComputerTurn(gameState)
     logEvent("player's turn")
-  }, randomNumInclusive(1000, 2000))
+  }, randomNumInclusive(Config.thinkingTimeMin, Config.thinkingTimeMax))
+}
+
+function sumPatternsFor(player, cellMap) {
+  for (const pattern of WinPatterns) {
+    let patternSum = 0
+    let blankCellNumberBuffer = null
+
+    pattern.forEach(cellNumber => {
+      const cellState = getCellState(cellMap, cellNumber)
+
+      if (cellState === player)
+        patternSum++
+      else if (cellState === CellState.Empty)
+        blankCellNumberBuffer = cellNumber
+    })
+
+    if (patternSum === 2 && blankCellNumberBuffer !== null)
+      return blankCellNumberBuffer
+  }
+
+  return null
 }
 
 function getComputerNextMove(gameState) {
   let nextMove = null
 
-  const sumPatternsFor = (player) => {
-    for (const pattern of WinPatterns) {
-      let patternSum = 0
-      let blankCellNumberBuffer = null
-
-      pattern.forEach((cellNumber) => {
-        const cellState = getCellState(gameState.cellMap, cellNumber)
-
-        if (cellState === player)
-          patternSum++
-        else if (cellState === CellState.Blank)
-          blankCellNumberBuffer = cellNumber
-      })
-
-      if (patternSum === 2 && blankCellNumberBuffer !== null)
-        return blankCellNumberBuffer
-    }
-
-    return null
-  }
-
   if (gameState.isComputerSmart)
-    nextMove = sumPatternsFor(CellState.O) ?? sumPatternsFor(CellState.X)
+    nextMove = sumPatternsFor(CellState.O, gameState.cellMap)
+      ?? sumPatternsFor(CellState.X, gameState.cellMap)
 
   if (nextMove === null)
     // OPTIMIZE: Better approach than having a while loop. Guess loop can technically
     // run forever.
 
     // If no next cell was decided, play a random blank cell instead.
-    do {
+    do
       nextMove = randomNumInclusive(1, 9) - 1
-    } while (getCellState(gameState.cellMap, nextMove) !== CellState.Blank)
+    while (getCellState(gameState.cellMap, nextMove) !== CellState.Empty)
 
   return nextMove
 }
@@ -250,7 +259,7 @@ function getComputerNextMove(gameState) {
 function processComputerTurn(gameState) {
   setActiveStatus(false)
   setCellState(gameState.cellMap, getComputerNextMove(gameState), CellState.O)
-  playSound(Sound.PlayerTurn)
+  tryPlaySound(Sound.PlayerTurn)
 
   if (checkForGameEnd(gameState))
     return
@@ -288,11 +297,10 @@ function getCellState(cellMap, cellNumber) {
 function cellRowOf(cellNumber) {
   let row = 2
 
-  if (cellNumber >= 0 && cellNumber <= 2) {
+  if (cellNumber >= 0 && cellNumber <= 2)
     row = 0
-  } else if (cellNumber >= 3 && cellNumber <= 5) {
+  else if (cellNumber >= 3 && cellNumber <= 5)
     row = 1
-  }
 
   return row
 }
@@ -364,24 +372,23 @@ function randomNumInclusive(min, max) {
 }
 
 /**
- * Retrieve the initial game state. The cell map will be deep-copied.
+ * Create the initial game state. The cell map will be deep-copied.
  */
-function getInitialState() {
+function makeInitialState() {
   logEvent("game init")
 
-  // NOTE: Deep-copy is needed. Simulate it using JSON methods.
   return {
     score: [0, 0, 0],
     isPlayerTurn: randomNumInclusive(1, 2) === 1,
     lastCell: null,
+    // NOTE: Deep-copy is needed. Simulate it using JSON methods.
     cellMap: JSON.parse(JSON.stringify(defaultCellMap)),
     isComputerSmart: true,
   }
 }
 
 /**
- * Winner-winner, chicken dinner! Check to see if a player has
- * won the game.
+ * Check to see if a player has won the game.
  */
 function checkForWinner(cellMap) {
   for (const pattern of WinPatterns) {
@@ -391,7 +398,7 @@ function checkForWinner(cellMap) {
       const cellState = getCellState(cellMap, cellNumber)
 
       // Pattern is not consecutive. There's a blank state.
-      if (cellState === CellState.Blank)
+      if (cellState === CellState.Empty)
         return true
 
       return cellState !== firstState
@@ -406,32 +413,33 @@ function checkForWinner(cellMap) {
   return null
 }
 
-function playSound(sound) {
+/**
+ * Attempt to play the given sound.
+ *
+ * If the user has not clicked or interacted with the browser window's content,
+ * this operation will not be performed (disallowed by the browser).
+ */
+function tryPlaySound(sound) {
   try {
-    new Audio(`res/${sound}.wav`).play()
+    new Audio(`assets/${sound}.wav`).play()
   } catch (e) {
-    logEvent(
-      "failed to play sound: user likely hasn't interacted with the window content yet"
-    )
+    logEvent("failed to play sound: user may not have interacted with the window content yet")
   }
 }
 
 function checkForTie(cellMap) {
   // REVISE: Use `.every` instead.
-  return !cellMap.some((row) => row.some((cell) => cell === CellState.Blank))
+  return !cellMap.some((row) => row.some((cell) => cell === CellState.Empty))
 }
 
 /**
  * Display an alert message to the user, under the game table,
  * in the form of text. After a short period, this message will
  * be hidden (if no other messages were shown during the timeout).
- * @param {*} message 
- * @param {*} kind 
  */
 function displayAlert(message, kind) {
-  if (kind === AlertKind.Bad) {
-    playSound(Sound.Error)
-  }
+  if (kind === AlertKind.Bad)
+    tryPlaySound(Sound.Error)
 
   let $alert = $("#alert")
 
@@ -467,7 +475,7 @@ const setupEvents = (gameState) => {
   $("#smart-ai")
     .off("click")
     .click(function () {
-      playSound(Sound.Toggle)
+      tryPlaySound(Sound.Toggle)
       gameState.isComputerSmart = !gameState.isComputerSmart
       $(this).toggleClass("active", gameState.isComputerSmart)
       logEvent("set computer smart mode: " + gameState.isComputerSmart)
@@ -488,7 +496,6 @@ const setupEvents = (gameState) => {
     // your turn. Let the computer do its think think.
     if (!gameState.isPlayerTurn) {
       logEvent("player is eager to play! clicked, but not his/her turn yet")
-
       displayAlert("⛔ It's not your turn yet.", AlertKind.Bad)
 
       return
@@ -496,7 +503,7 @@ const setupEvents = (gameState) => {
     // You won't be breaking my game anytime soon. That
     // cell was already played before by either you or
     // the computer.
-    else if (cellState !== CellState.Blank) {
+    else if (cellState !== CellState.Empty) {
       logEvent("clicked on sealed cell ignored")
 
       displayAlert(
@@ -507,7 +514,7 @@ const setupEvents = (gameState) => {
       return
     }
 
-    playSound(Sound.Click)
+    tryPlaySound(Sound.Click)
     processPick(gameState, cellNumber)
   })
 }
@@ -516,26 +523,26 @@ window.onkeydown = (e) => {
   logEvent(`user pressed key with code '${e.keyCode}'`)
 
   // Hard-reload the page upon pressing the ESC key.
-  if (e.keyCode === 27) {
+  if (e.key === "Escape") {
     document.cookie = ""
     window.location.reload(true)
   }
 }
 
-// Initialization of this script.
+// Initialization.
 window.onload = () => {
   logEvent("init particles")
 
-  particlesJS.load("particles", "./res/particle-config.json", () => {
+  particlesJS.load("particles", "./assets/particle-config.json", () =>
     logEvent("loaded particle config")
-  })
+  )
 
-  let initialGameState = getInitialState()
+  let initialGameState = makeInitialState()
 
   // Load the cached score, if applicable.
-  if (document.cookie !== undefined && document.cookie.startsWith("[")) {
+  if (document.cookie !== undefined && document.cookie.startsWith("["))
+    // REVISE: Use localStorage API instead.
     initialGameState.score = JSON.parse(document.cookie)
-  }
 
   updateScore(initialGameState.score)
   setupEvents(initialGameState)
