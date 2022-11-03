@@ -20,6 +20,9 @@
 html,
 body {
   height: 100%;
+  width: 100%;
+  margin: 0;
+  padding: 0;
 }
 
 body {
@@ -31,7 +34,7 @@ body {
 
 a {
   text-decoration: none;
-  color: inherit !important;
+  color: inherit;
 }
 
 .container {
@@ -99,20 +102,21 @@ a {
   padding: 2rem;
 }
 
-.cells {
+.grid {
   height: auto;
   max-width: 100%;
   display: grid;
-  grid-template-columns: repeat(3, minmax(150px, 300px));
-  grid-template-rows: repeat(3, minmax(150px, 300px));
+  grid-template-columns: repeat(3, minmax(50px, 300px));
+  grid-template-rows: repeat(3, minmax(50px, 300px));
   gap: 3rem;
+  aspect-ratio: 1 / 1;
 }
 
-.cells:not(:last-child) {
+.grid:not(:last-child) {
   margin-bottom: var(--margin);
 }
 
-.cells>.cell {
+.cell {
   display: flex;
   justify-content: center;
   align-items: center;
@@ -123,59 +127,58 @@ a {
   border-radius: 15%;
   box-shadow: 0 8px 8px #1b1f22;
   transition: all 0.1s;
-  font-family: monospace;
   font-weight: bolder;
   font-size: 10rem;
   font-family: cursive;
 }
 
-.cells>.cell[data-cell-value="x"].last {
+.cell[data-cell-value="x"].last {
   box-shadow: 0 0 100px var(--color-player);
 }
 
-.cells>.cell[data-cell-value="o"].last {
+.cell[data-cell-value="o"].last {
   box-shadow: 0 0 100px var(--color-computer);
 }
 
-.cells>.cell[data-cell-value=""] {
+.cell[data-cell-value=""] {
   cursor: pointer;
 }
 
-.cells>.cell[data-cell-value=""]:hover {
+.cell[data-cell-value=""]:hover {
   border-color: #aaa;
   transform: translateY(-5px);
 }
 
-.cells>.cell[data-cell-value=""]:active {
+.cell[data-cell-value=""]:active {
   border-color: #fff;
   transform: translateY(5px) scale(0.9);
 }
 
-.cells>.cell:not(:last-child) {
+.cell:not(:last-child) {
   margin-right: var(--margin);
 }
 
-.cells>.cell.highlight {
-  border: 0 0 8px solid #000 !important;
+.cell.highlight {
+  border: 0 0 8px solid #000;
 }
 
-.cells>.cell[data-cell-value="x"] {
+.cell[data-cell-value="x"] {
   background-color: var(--color-player);
 }
 
-.cells>.cell::after {
+.cell::after {
   transform: translateY(-10px);
 }
 
-.cells>.cell[data-cell-value="x"]::after {
+.cell[data-cell-value="x"]::after {
   content: "X";
 }
 
-.cells>.cell[data-cell-value="o"] {
+.cell[data-cell-value="o"] {
   background-color: var(--color-computer);
 }
 
-.cells>.cell[data-cell-value="o"]::after {
+.cell[data-cell-value="o"]::after {
   content: "O";
 }
 
@@ -299,4 +302,10 @@ a {
 
 .sidebar .sidebar-btn.active {
   color: rgb(107, 197, 107);
+}
+
+@media screen and (max-width: 600px) {
+  html {
+    font-size: 8px;
+  }
 }
