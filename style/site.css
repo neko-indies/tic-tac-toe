@@ -100,10 +100,17 @@ a {
 .container {
   animation: pop 0.2s ease;
   padding: 2rem;
+  max-height: 100%;
+  height: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
 }
 
 .grid {
   height: auto;
+  max-height: 100%;
   max-width: 100%;
   display: grid;
   grid-template-columns: repeat(3, minmax(50px, 300px));
@@ -112,8 +119,8 @@ a {
   aspect-ratio: 1 / 1;
 }
 
-.grid:not(:last-child) {
-  margin-bottom: var(--margin);
+#alert {
+  margin-top: var(--margin);
 }
 
 .cell {
