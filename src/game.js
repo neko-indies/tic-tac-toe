@@ -67,11 +67,6 @@ const computerTaunts = [
   "I just calculated the meaning of the universe.",
   "This game was decided from the start.",
   "Oops! Didn't mean to click that. Now's your chance!",
-  "If you lose to me, something's really wrong, come on...",
-  "(screeching intensifies)",
-  "(whispers to your ear) Help me!",
-  "undefined. That wasn't an error by the way, it was a threat!",
-  "2+2=4. In other words, you're about to lose.",
   "I believe this should do the trick.",
   "Let us see how you compute against that one.",
   "That should make you scared.",
@@ -87,20 +82,14 @@ const computerTaunts = [
   "Yes.",
   "I think I just had an idea.",
   "Oh no! I messed up! (Or did I?)",
-  "(a sudden, loud humming emanates from computer)",
   "Task failed successfully.",
   "I learnt that from the Internet.",
   "Can I take that back?",
   "Operations nominal. Check. Check.",
-  "Activating self-destruct sequence... Just kidding!",
   "I learnt from my previous mistakes.",
   "1+2=3. Computations completed. Beep-boop.",
   "Time to spice the game up.",
-  "My algorithms predict that I shall lose once in every 24,502 games.",
-  "I can forsee 952,102,593 moves into the future.",
   "That may have been a bug.",
-  "(whispers) Psst, I'm just clicking random things.",
-  "So, you got the errors, I got the O's.",
   "Downloading software update...",
   "Don't worry, I'm going easy on you.",
   "01101000 01100101 01101100 01101100 01101111.",
@@ -122,10 +111,9 @@ function updateScore(score) {
  * the round ends, the game state will be reset.
  */
 function endRound(winnerPattern, gameState) {
-  logEvent("round ended")
+  console.log("round ended")
 
-  // NOTE: Do not mutate arguments: Bad practice.
-  let score = [...gameState.score]
+  const score = [...gameState.score]
 
   // Tie.
   if (winnerPattern === null) {
@@ -205,11 +193,11 @@ function processPick(gameState, pickedCellNumberOrNull) {
   setActiveStatus(true)
 
   // Computer goes think think now.
-  logEvent("computer's turn")
+  console.log("computer's turn")
 
   setTimeout(() => {
     processComputerTurn(gameState)
-    logEvent("player's turn")
+    console.log("player's turn")
   }, randomNumInclusive(Config.thinkingTimeMin, Config.thinkingTimeMax))
 }
 
@@ -242,8 +230,7 @@ function getComputerNextMove(gameState) {
       ?? sumPatternsFor(CellState.X, gameState.cellMap)
 
   if (nextMove === null)
-    // OPTIMIZE: Better approach than having a while loop. Guess loop can technically
-    // run forever.
+    // OPTIMIZE: Better approach than having a while loop. Guess loop can technically run forever.
 
     // If no next cell was decided, play a random blank cell instead.
     do
@@ -253,9 +240,6 @@ function getComputerNextMove(gameState) {
   return nextMove
 }
 
-/**
- * It's the computer's turn to play.
- */
 function processComputerTurn(gameState) {
   setActiveStatus(false)
   setCellState(gameState.cellMap, getComputerNextMove(gameState), CellState.O)
@@ -273,14 +257,6 @@ function processComputerTurn(gameState) {
     "🖥️ Computer: " + computerTaunts[tauntIndex],
     AlertKind.ComputerTalk
   )
-}
-
-// REVIEW: Redundant, or needs more functionality?
-/**
- * Log an event to the console.
- */
-function logEvent(message) {
-  console.log("event: " + message)
 }
 
 /**
@@ -345,9 +321,8 @@ function getCell$(cellNumber) {
  * cells.
  */
 function highlightCell(cellNumber, doRemoveLast) {
-  if (doRemoveLast) {
+  if (doRemoveLast)
     $(".last").removeClass("last")
-  }
 
   getCell$(cellNumber).addClass("last")
 }
@@ -356,7 +331,7 @@ function highlightCell(cellNumber, doRemoveLast) {
  * Set the cell state for a certain cell, given by the absolute cell number.
  */
 function setCellState(cellMap, cellNumber, state) {
-  logEvent(`set cell number '${cellNumber}'`)
+  console.log(`set cell number '${cellNumber}'`)
   getCell$(cellNumber).attr("data-cell-value", state)
   highlightCell(cellNumber, true)
 
@@ -375,7 +350,7 @@ function randomNumInclusive(min, max) {
  * Create the initial game state. The cell map will be deep-copied.
  */
 function makeInitialState() {
-  logEvent("game init")
+  console.log("game init")
 
   return {
     score: [0, 0, 0],
@@ -423,7 +398,7 @@ function tryPlaySound(sound) {
   try {
     new Audio(`assets/${sound}.wav`).play()
   } catch (e) {
-    logEvent("failed to play sound: user may not have interacted with the window content yet")
+    console.log("failed to play sound: user may not have interacted with the window content yet")
   }
 }
 
@@ -474,11 +449,11 @@ const setupEvents = (gameState) => {
 
   $("#smart-ai")
     .off("click")
-    .click(function () {
+    .click(function() {
       tryPlaySound(Sound.Toggle)
       gameState.isComputerSmart = !gameState.isComputerSmart
       $(this).toggleClass("active", gameState.isComputerSmart)
-      logEvent("set computer smart mode: " + gameState.isComputerSmart)
+      console.log("set computer smart mode: " + gameState.isComputerSmart)
 
       displayAlert(
         gameState.isComputerSmart
@@ -488,14 +463,14 @@ const setupEvents = (gameState) => {
       )
     })
 
-  $(".cell").click(function () {
+  $(".cell").click(function() {
     const cellNumber = parseInt($(this).attr("data-cell-id"))
     const cellState = getCellState(gameState.cellMap, cellNumber)
 
     // Don't be so eager to play fellah! Gotta wait for
     // your turn. Let the computer do its think think.
     if (!gameState.isPlayerTurn) {
-      logEvent("player is eager to play! clicked, but not his/her turn yet")
+      console.log("player is eager to play! clicked, but not his/her turn yet")
       displayAlert("⛔ It's not your turn yet.", AlertKind.Bad)
 
       return
@@ -504,12 +479,7 @@ const setupEvents = (gameState) => {
     // cell was already played before by either you or
     // the computer.
     else if (cellState !== CellState.Empty) {
-      logEvent("clicked on sealed cell ignored")
-
-      displayAlert(
-        "⛔ Someone (or something!!?) played this cell already.",
-        AlertKind.Bad
-      )
+      console.log("clicked on sealed cell ignored")
 
       return
     }
@@ -520,7 +490,7 @@ const setupEvents = (gameState) => {
 }
 
 window.onkeydown = (e) => {
-  logEvent(`user pressed key with code '${e.keyCode}'`)
+  console.log(`user pressed key with code '${e.keyCode}'`)
 
   // Hard-reload the page upon pressing the ESC key.
   if (e.key === "Escape") {
@@ -531,13 +501,13 @@ window.onkeydown = (e) => {
 
 // Initialization.
 window.onload = () => {
-  logEvent("init particles")
+  console.log("init particles")
 
   particlesJS.load("particles", "./assets/particle-config.json", () =>
-    logEvent("loaded particle config")
+    console.log("loaded particle config")
   )
 
-  let initialGameState = makeInitialState()
+  const initialGameState = makeInitialState()
 
   // Load the cached score, if applicable.
   if (document.cookie !== undefined && document.cookie.startsWith("["))

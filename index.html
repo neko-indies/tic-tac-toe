@@ -1,59 +1,63 @@
 <!DOCTYPE html>
 <html>
+  <head>
+    <meta charset="utf-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, user-scalable=no" />
+    <title>TicTacToe &mdash; by Yurixander R.</title>
 
-<head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
-  <title>TicTacToe &mdash; by Yurixander R.</title>
+    <!-- JQuery lib. -->
+    <script
+      src="https://code.jquery.com/jquery-3.6.0.min.js"
+      integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4="
+      crossorigin="anonymous"></script>
 
-  <!-- JQuery lib. -->
-  <script src="https://code.jquery.com/jquery-3.6.0.min.js"
-    integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous"></script>
+    <!-- Other libraries. -->
+    <script src="https://cdn.jsdelivr.net/npm/particles.js@2.0.0/particles.js"></script>
 
-  <!-- Other libraries. -->
-  <script src="https://cdn.jsdelivr.net/npm/particles.js@2.0.0/particles.js"></script>
+    <!-- Local CSS. -->
+    <link rel="stylesheet" type="text/css" href="style/site.css" />
 
-  <!-- Local CSS. -->
-  <link rel="stylesheet" type="text/css" href="style/site.css" />
+    <!-- Local scripts. -->
+    <script defer src="src/game.js"></script>
+  </head>
 
-  <!-- Local scripts. -->
-  <script defer src="src/game.js"></script>
-</head>
-
-<body class="d-flex align-items-center bg-dark text-white">
-  <div id="particles"></div>
-  <div class="sidebar d-flex">
-    <div class="sidebar-btn active" id="smart-ai">Smart&trade;</div>
-    <div id="tie-counter"></div>
-  </div>
-  <div class="sidebar d-flex left">
-    <a target="_blank" href="https://yurixander.dev">By Yurixander R.</a>
-  </div>
-  <div class="status" id="status-player">
-    <div class="turn-status">Player</div>
-    <div id="score-player">0</div>
-  </div>
-  <div class="status" id="status-computer">
-    <div id="score-computer">0</div>
-    <div class="turn-status">Computer</div>
-  </div>
-  <div class="container">
-    <div class="grid">
-      <!-- 1st row -->
-      <div class="cell" data-cell-id="0" data-cell-value=""></div>
-      <div class="cell" data-cell-id="1" data-cell-value=""></div>
-      <div class="cell" data-cell-id="2" data-cell-value=""></div>
-      <!-- 2nd row -->
-      <div class="cell" data-cell-id="3" data-cell-value=""></div>
-      <div class="cell" data-cell-id="4" data-cell-value=""></div>
-      <div class="cell" data-cell-id="5" data-cell-value=""></div>
-      <!-- 3rd row -->
-      <div class="cell" data-cell-id="6" data-cell-value=""></div>
-      <div class="cell" data-cell-id="7" data-cell-value=""></div>
-      <div class="cell" data-cell-id="8" data-cell-value=""></div>
+  <body class="d-flex align-items-center bg-dark text-white">
+    <div id="particles"></div>
+    <div class="sidebar d-flex">
+      <div class="sidebar-btn active" id="smart-ai">Smart&trade;</div>
+      <div id="tie-counter"></div>
     </div>
-    <div id="alert"></div>
-  </div>
-</body>
-
+    <div class="sidebar d-flex left">
+      <a target="_blank" href="https://yurixander.dev">By Yurixander R.</a>
+    </div>
+    <div class="status" id="status-player">
+      <div class="turn-status">Player</div>
+      <div id="score-player">0</div>
+    </div>
+    <div class="status" id="status-computer">
+      <div id="score-computer">0</div>
+      <div class="turn-status">Computer</div>
+    </div>
+    <div class="container">
+      <div class="grid-wrapper">
+        <div class="grid">
+          <!-- 1st row -->
+          <div class="cell" data-cell-id="0" data-cell-value=""></div>
+          <div class="cell" data-cell-id="1" data-cell-value=""></div>
+          <div class="cell" data-cell-id="2" data-cell-value=""></div>
+          <!-- 2nd row -->
+          <div class="cell" data-cell-id="3" data-cell-value=""></div>
+          <div class="cell" data-cell-id="4" data-cell-value=""></div>
+          <div class="cell" data-cell-id="5" data-cell-value=""></div>
+          <!-- 3rd row -->
+          <div class="cell" data-cell-id="6" data-cell-value=""></div>
+          <div class="cell" data-cell-id="7" data-cell-value=""></div>
+          <div class="cell" data-cell-id="8" data-cell-value=""></div>
+        </div>
+      </div>
+      <div id="alert"></div>
+    </div>
+  </body>
 </html>
